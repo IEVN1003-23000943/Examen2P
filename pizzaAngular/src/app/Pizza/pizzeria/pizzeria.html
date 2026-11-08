@@ -1,0 +1,289 @@
+<div class="min-h-screen bg-amber-50 font-sans p-4 md:p-8">
+  <!-- Encabezado Principal -->
+  <header class="max-w-7xl mx-auto mb-8 text-center bg-red-700 text-white p-6 rounded-2xl shadow-xl border-b-4 border-amber-400">
+    <h1 class="text-4xl font-extrabold uppercase tracking-wider flex items-center justify-center gap-3">
+      🍕 Pizzería Don Josué
+    </h1>
+    <p class="text-amber-200 text-sm md:text-base mt-1 font-medium">Sistema de Registro de Pedidos y Control de Ventas</p>
+  </header>
+
+  <!-- Alerta Flash Mensaje -->
+  <div *ngIf="mensajeFlash" class="max-w-7xl mx-auto mb-6 p-4 text-green-800 bg-green-100 border-l-4 border-green-600 rounded-lg shadow-md flex justify-between items-center">
+    <span class="font-semibold text-lg">{{ mensajeFlash }}</span>
+    <button (click)="mensajeFlash = null" class="text-green-800 font-bold hover:text-green-950">✕</button>
+  </div>
+
+  <!-- Alerta Error -->
+  <div *ngIf="mensajeError" class="max-w-7xl mx-auto mb-6 p-4 text-red-800 bg-red-100 border-l-4 border-red-600 rounded-lg shadow-md flex justify-between items-center">
+    <span class="font-semibold text-lg">{{ mensajeError }}</span>
+    <button (click)="mensajeError = null" class="text-red-800 font-bold hover:text-red-950">✕</button>
+  </div>
+
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- COLUMNA IZQUIERDA: Formulario de captura (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Sección Datos del Cliente -->
+      <section class="bg-white p-6 rounded-2xl shadow-lg border border-amber-200">
+        <h2 class="text-xl font-bold text-red-700 mb-4 border-b-2 border-red-100 pb-2 flex items-center gap-2">
+          👤 Datos del Cliente
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Nombre completo</label>
+            <input type="text" [(ngModel)]="nombreCliente" placeholder="Ej. Carlos Mendoza"
+                   class="w-full text-base p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-amber-50/30">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
+            <input type="text" [(ngModel)]="telefono" placeholder="Ej. 4771234567"
+                   class="w-full text-base p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-amber-50/30">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-gray-700 mb-1">Dirección de entrega</label>
+            <input type="text" [(ngModel)]="direccion" placeholder="Ej. Avenida Insurgentes 450"
+                   class="w-full text-base p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-amber-50/30">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de compra</label>
+            <input type="date" [(ngModel)]="fechaCompra"
+                   class="w-full text-base p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-amber-50/30">
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección Configuración de Pizza -->
+      <section class="bg-white p-6 rounded-2xl shadow-lg border border-amber-200">
+        <h2 class="text-xl font-bold text-red-700 mb-4 border-b-2 border-red-100 pb-2 flex items-center gap-2">
+          🍕 Selección de Pizza
+        </h2>
+
+        <!-- Tamaño de Pizza corregido con *ngFor -->
+        <div class="mb-5">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Tamaño de la Pizza</label>
+          <div class="grid grid-cols-3 gap-3">
+            <label *ngFor="let t of ['Chica', 'Mediana', 'Grande']"
+                   [class.bg-red-600]="tamanoSeleccionado === t"
+                   [class.text-white]="tamanoSeleccionado === t"
+                   [class.bg-amber-100]="tamanoSeleccionado !== t"
+                   [class.text-gray-800]="tamanoSeleccionado !== t"
+                   class="flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer transition-all border font-semibold border-amber-300 hover:shadow-md">
+              <input type="radio" name="tamano" [value]="t" [(ngModel)]="tamanoSeleccionado" class="hidden">
+              <span class="text-base">{{ t }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 12 Ingredientes Adicionales -->
+        <div class="mb-5">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Ingredientes Adicionales ($10 c/u)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <label *ngFor="let key of listaIngredientes"
+                   class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors">
+              <input type="checkbox" [(ngModel)]="ingredientes[key]" class="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300">
+              <span class="text-sm font-medium text-gray-800">{{ key }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Número de pizzas y Botón Agregar -->
+        <div class="flex flex-col sm:flex-row items-end gap-4">
+          <div class="w-full sm:w-1/3">
+            <label class="block text-sm font-bold text-gray-700 mb-1">Número de pizzas</label>
+            <input type="number" min="1" [(ngModel)]="numPizzas"
+                   class="w-full text-base p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-amber-50/30">
+          </div>
+          <button (click)="agregarPizza()"
+                  class="w-full sm:w-2/3 py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base">
+            ➕ Agregar Pizza
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Tabla de Detalle & Botón Terminar (5 cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <section class="bg-white p-6 rounded-2xl shadow-lg border border-amber-200 flex flex-col justify-between h-full">
+        <div>
+          <h2 class="text-xl font-bold text-red-700 mb-4 border-b-2 border-red-100 pb-2 flex items-center justify-between">
+            <span>📋 Resumen del Pedido</span>
+            <span class="text-sm font-normal text-gray-500">{{ listaDetalles.length }} ítem(s)</span>
+          </h2>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-gray-200 text-gray-600 text-xs uppercase bg-amber-50">
+                  <th class="p-2">Pizza</th>
+                  <th class="p-2">Cant.</th>
+                  <th class="p-2">Subtotal</th>
+                  <th class="p-2 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-sm">
+                <tr *ngFor="let item of listaDetalles; let i = index" class="hover:bg-amber-50/50">
+                  <td class="p-2">
+                    <div class="font-bold text-gray-800">{{ item.tamano }}</div>
+                    <div class="text-xs text-gray-500">{{ item.ingredientes.join(', ') }}</div>
+                  </td>
+                  <td class="p-2 font-semibold">{{ item.cantidad }}</td>
+                  <td class="p-2 font-bold text-red-700">${{ item.subtotal }}</td>
+                  <td class="p-2 text-center">
+                    <button (click)="quitarPizza(i)" class="text-red-500 hover:text-red-700 font-bold p-1">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="listaDetalles.length === 0">
+                  <td colspan="4" class="text-center p-6 text-gray-400 italic">
+                    No hay pizzas agregadas al pedido.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Total y Botón guardar -->
+        <div class="mt-6 pt-4 border-t-2 border-amber-100">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-lg font-bold text-gray-700">Total a Pagar:</span>
+            <span class="text-3xl font-extrabold text-red-700">${{ totalPedido }}</span>
+          </div>
+          <button (click)="guardarPedido()"
+                  class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold text-lg rounded-xl shadow-lg transition-all uppercase tracking-wide">
+            ✅ Terminar y Registrar Pedido
+          </button>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- SECCIÓN CONSULTA DE VENTAS -->
+  <div class="max-w-7xl mx-auto mt-12 bg-white p-6 rounded-2xl shadow-lg border border-amber-200">
+    <h2 class="text-2xl font-bold text-red-700 mb-6 border-b-2 border-red-100 pb-2 flex items-center gap-2">
+      📊 Consulta de Ventas Acumuladas
+    </h2>
+
+    <div class="flex flex-col md:flex-row items-end gap-4 mb-6">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-1">Filtrar por</label>
+        <select [(ngModel)]="filtroTipo" class="p-3 border border-gray-300 rounded-xl bg-amber-50/30 text-base font-medium">
+          <option value="dia">Día de la semana</option>
+          <option value="mes">Mes del año</option>
+        </select>
+      </div>
+
+      <div *ngIf="filtroTipo === 'dia'">
+        <label class="block text-sm font-bold text-gray-700 mb-1">Selecciona día</label>
+        <select [(ngModel)]="busquedaDia" class="p-3 border border-gray-300 rounded-xl bg-amber-50/30 text-base font-medium">
+          <option value="lunes">Lunes</option>
+          <option value="martes">Martes</option>
+          <option value="miercoles">Miércoles</option>
+          <option value="jueves">Jueves</option>
+          <option value="viernes">Viernes</option>
+          <option value="sabado">Sábado</option>
+          <option value="domingo">Domingo</option>
+        </select>
+      </div>
+
+      <div *ngIf="filtroTipo === 'mes'">
+        <label class="block text-sm font-bold text-gray-700 mb-1">Selecciona mes</label>
+        <select [(ngModel)]="busquedaMes" class="p-3 border border-gray-300 rounded-xl bg-amber-50/30 text-base font-medium">
+          <option value="enero">Enero</option>
+          <option value="febrero">Febrero</option>
+          <option value="marzo">Marzo</option>
+          <option value="abril">Abril</option>
+          <option value="mayo">Mayo</option>
+          <option value="junio">Junio</option>
+          <option value="julio">Julio</option>
+          <option value="agosto">Agosto</option>
+          <option value="septiembre">Septiembre</option>
+          <option value="octubre">Octubre</option>
+          <option value="noviembre">Noviembre</option>
+          <option value="diciembre">Diciembre</option>
+        </select>
+      </div>
+
+      <button (click)="consultarVentas()" class="py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all">
+        🔍 Consultar Ventas
+      </button>
+    </div>
+
+    <!-- Resultados de ventas -->
+    <div *ngIf="ventasResultado.length > 0">
+      <div class="overflow-x-auto mb-4">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-red-700 text-white text-sm">
+              <th class="p-3">ID Pedido</th>
+              <th class="p-3">Cliente</th>
+              <th class="p-3">Fecha</th>
+              <th class="p-3">Total</th>
+              <th class="p-3 text-center">Detalle</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let v of ventasResultado" class="hover:bg-amber-50">
+              <td class="p-3 font-bold text-gray-700">#{{ v.id }}</td>
+              <td class="p-3">{{ v.cliente }}</td>
+              <td class="p-3">{{ v.fecha }}</td>
+              <td class="p-3 font-bold text-red-700">${{ v.total }}</td>
+              <td class="p-3 text-center">
+                <button (click)="verDetalleVenta(v.id)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">
+                  👁️ Ver Pizzas
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="p-4 bg-amber-100 rounded-xl flex justify-between items-center">
+        <span class="text-base font-bold text-gray-800">Total Acumulado:</span>
+        <span class="text-2xl font-extrabold text-red-700">${{ totalAcumuladoConsulta }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALLE DE VENTA -->
+  <div *ngIf="detalleSeleccionadoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border-t-8 border-red-600">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">Detalle del Pedido</h3>
+        <button (click)="cerrarModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+      </div>
+
+      <div class="space-y-2 mb-4 text-sm text-gray-600">
+        <p><strong>Cliente:</strong> {{ detalleSeleccionadoModal.cliente }}</p>
+        <p><strong>Fecha:</strong> {{ detalleSeleccionadoModal.fecha }}</p>
+        <p><strong>Total:</strong> ${{ detalleSeleccionadoModal.total }}</p>
+      </div>
+
+      <table class="w-full text-left text-sm border-collapse mb-4">
+        <thead>
+          <tr class="bg-amber-100 text-gray-700">
+            <th class="p-2">Tamaño</th>
+            <th class="p-2">Ingredientes</th>
+            <th class="p-2">Cant.</th>
+            <th class="p-2">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of detalleSeleccionadoModal.pizzas" class="border-b">
+            <td class="p-2 font-semibold">{{ p.tamano }}</td>
+            <td class="p-2 text-xs">{{ p.ingredientes }}</td>
+            <td class="p-2">{{ p.cantidad }}</td>
+            <td class="p-2 font-bold">${{ p.subtotal }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button (click)="cerrarModal()" class="w-full py-2 bg-gray-200 hover:bg-gray-300 font-bold rounded-xl text-gray-700">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
